@@ -12,7 +12,7 @@ Implémente les formules classiques de gestion de stock :
 
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
+from statistics import NormalDist
 
 
 def compute_all(df: pd.DataFrame, taux_service: float = 0.95) -> pd.DataFrame:
@@ -39,7 +39,7 @@ def compute_all(df: pd.DataFrame, taux_service: float = 0.95) -> pd.DataFrame:
     # --- 1. Z-Score pour le taux de service ---
     # Z = Φ⁻¹(taux_service) — quantile de la loi normale standard
     # Source : Silver, Pyke & Thomas (2017), "Inventory and Production Management"
-    z = norm.ppf(taux_service)
+    z = NormalDist().inv_cdf(taux_service)
     df["z_score"] = z
 
     # --- 2. Stock de sécurité (Safety Stock) ---
