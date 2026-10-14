@@ -128,8 +128,8 @@ def generate_articles() -> pd.DataFrame:
 
         # --- Stock actuel (créer les situations d'alerte) ---
         # Calculer SS et ROP approximatifs pour dimensionner le stock
-        from scipy.stats import norm
-        z = norm.ppf(0.95)
+        from statistics import NormalDist
+        z = NormalDist().inv_cdf(0.95)
         ss_approx = z * np.sqrt(delai * ecart_type**2 + conso**2 * delai_std**2)
         rop_approx = conso * delai + ss_approx
 
