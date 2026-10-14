@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management Tool</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" id="logo-link" class="logo-container">
+                    <img src="/logo.png" alt="Logo" class="logo">
+                </a>
+                <h2 class="sidebar-title">Inventory Management Tool</h2>
+            </div>
+            <nav class="nav-menu disabled" id="main-nav">
+                <a href="#" class="nav-item" data-target="dashboard">
+                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-target="abc-xyz">
+                    <i class="fas fa-layer-group"></i> <span>ABC-XYZ</span>
+                </a>
+                <a href="#" class="nav-item" data-target="alerts">
+                    <i class="fas fa-exclamation-triangle"></i> <span>Alertes</span>
+                </a>
+                <a href="#" class="nav-item" data-target="suppliers">
+                    <i class="fas fa-industry"></i> <span>Fournisseurs</span>
+                </a>
+                <a href="#" class="nav-item" data-target="simulator">
+                    <i class="fas fa-sliders-h"></i> <span>Simulateur</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="upload-section">
+                    <label for="file-upload" class="custom-file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Importer Excel/CSV
+                    </label>
+                    <input id="file-upload" type="file" hidden>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 id="page-title">Bienvenue</h1>
+                <div class="user-info">
+                    <span id="data-status"><i class="fas fa-circle status-red"></i> Déconnecté</span>
+                </div>
+            </header>
+
+            <!-- Floating Demo Button -->
+            <button id="load-demo-btn" class="floating-demo-btn">
+                <i class="fas fa-vial"></i> Données de Test
+            </button>
+
+            <!-- Welcome Section -->
+            <section id="welcome" class="content-section active">
+                <div class="welcome-container glass">
+                    <div class="welcome-header">
+                        <h2>Prêt à optimiser vos stocks ?</h2>
+                        <p>Pour commencer, veuillez importer un fichier Excel ou CSV respectant la structure ci-dessous.</p>
+                    </div>
+                    
+                    <div class="data-structure">
+                        <h3>Structure de Données Requise</h3>
+                        <div class="table-scroll">
+                            <table id="structure-table">
+                                <thead>
+                                    <tr>
+                                        <th>Colonne</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>article_id</td><td>Texte</td><td>Identifiant unique de l'article</td></tr>
+                                    <tr><td>article_nom</td><td>Texte</td><td>Libellé de l'article</td></tr>
+                                    <tr><td>stock_actuel</td><td>Nombre</td><td>Quantité en stock</td></tr>
+                                    <tr><td>consommation_moyenne_jour</td><td>Nombre</td><td>Demande journalière moyenne</td></tr>
+                                    <tr><td>ecart_type_consommation</td><td>Nombre</td><td>Écart-type de la demande</td></tr>
+                                    <tr><td>delai_fournisseur_jours</td><td>Nombre</td><td>Lead time moyen (jours)</td></tr>
+                                    <tr><td>delai_ecart_type</td><td>Nombre</td><td>Variabilité du lead time</td></tr>
+                                    <tr><td>prix_unitaire</td><td>Nombre</td><td>Prix d'achat unitaire (MAD)</td></tr>
+                                    <tr><td>cout_commande</td><td>Nombre</td><td>Coût fixe par commande</td></tr>
+                                    <tr><td>taux_possession</td><td>Nombre</td><td>Taux de possession annuel</td></tr>
+                                    <tr><td>fournisseur_id</td><td>Texte</td><td>ID du fournisseur</td></tr>
+                                    <tr><td>fournisseur_nom</td><td>Texte</td><td>Nom du fournisseur</td></tr>
+                                    <tr><td>derniere_livraison_date</td><td>Date</td><td>Date de la dernière réception</td></tr>
+                                    <tr><td>quantite_commandee_en_cours</td><td>Nombre</td><td>Qté en commande ouverte</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="welcome-actions">
+                        <button onclick="document.getElementById('file-upload').click()" class="btn-primary">
+                            <i class="fas fa-file-import"></i> Importer Maintenant
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Taux de Service</span>
+                            <h3 id="kpi-service">--</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Valeur Stock</span>
+                            <h3 id="kpi-value">--</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fas fa-bell"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Alertes Critiques</span>
+                            <h3 id="kpi-alerts">--</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fas fa-box-open"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Ruptures</span>
+                            <h3 id="kpi-ruptures">--</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-container glass">
+                        <h3>Niveaux de Stock</h3>
+                        <div id="stock-chart"></div>
+                    </div>
+                </div>
+
+                <div class="table-container glass">
+                    <h3>Top 10 Alertes Actives</h3>
+                    <table id="alerts-table">
+                        <thead>
+                            <tr>
+                                <th>Niveau</th>
+                                <th>Article</th>
+                                <th>Stock</th>
+                                <th>Jours Rupture</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ABC-XYZ Section -->
+            <section id="abc-xyz" class="content-section">
+                <div class="charts-row">
+                    <div class="chart-container glass">
+                        <h3>Matrice ABC-XYZ</h3>
+                        <div id="abc-xyz-heatmap"></div>
+                    </div>
+                    <div class="chart-container glass">
+                        <h3>Analyse Valeur vs Variabilité</h3>
+                        <div id="abc-xyz-scatter"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Section -->
+            <section id="alerts" class="content-section">
+                <div class="table-container glass">
+                    <div class="table-header">
+                        <h3>Toutes les Alertes</h3>
+                        <button class="btn-action"><i class="fas fa-download"></i> CSV</button>
+                    </div>
+                    <table id="full-alerts-table">
+                        <thead>
+                            <tr>
+                                <th>Niveau</th>
+                                <th>Article</th>
+                                <th>Stock</th>
+                                <th>Fournisseur</th>
+                                <th>Qté Suggérée</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Suppliers Section -->
+            <section id="suppliers" class="content-section">
+                <div class="table-container glass">
+                    <h3>Performance Fournisseurs</h3>
+                    <table id="suppliers-table">
+                        <thead>
+                            <tr>
+                                <th>Fournisseur</th>
+                                <th>Score</th>
+                                <th>Délai Moy</th>
+                                <th>Conformité</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-container glass" style="margin-top: 20px;">
+                    <div id="supplier-radar"></div>
+                </div>
+            </section>
+
+            <!-- Simulator Section -->
+            <section id="simulator" class="content-section">
+                <div class="simulator-layout">
+                    <div class="simulator-controls glass">
+                        <h3>Paramètres du Scénario</h3>
+                        <div class="control-item">
+                            <label>Taux de Service Cible (%)</label>
+                            <input type="range" id="sim-service" min="80" max="99" value="95">
+                            <span id="sim-service-val">95%</span>
+                        </div>
+                        <div class="control-item">
+                            <label>Variation Lead Time (jours)</label>
+                            <input type="range" id="sim-lead" min="-10" max="20" value="0">
+                            <span id="sim-lead-val">+0j</span>
+                        </div>
+                        <div class="control-item">
+                            <label>Variation Demande (%)</label>
+                            <input type="range" id="sim-demand" min="-50" max="100" value="0">
+                            <span id="sim-demand-val">+0%</span>
+                        </div>
+                        <div class="control-item">
+                            <label>Facteur Coût de Rupture (× Prix)</label>
+                            <input type="range" id="sim-shortage" min="1" max="10" value="2" step="0.5">
+                            <span id="sim-shortage-val">2.0x</span>
+                        </div>
+                        <button id="run-sim-btn" class="btn-primary" style="width: 100%; margin-top: 20px;">
+                            <i class="fas fa-play"></i> Simuler l'Impact
+                        </button>
+                    </div>
+
+                    <div class="simulator-results">
+                        <div class="sim-kpi-grid">
+                            <div class="kpi-card glass">
+                                <div class="kpi-label">Impact Coût Total</div>
+                                <h3 id="sim-kpi-cost">--</h3>
+                                <div id="sim-kpi-cost-delta" class="kpi-delta"></div>
+                            </div>
+                            <div class="kpi-card glass">
+                                <div class="kpi-label">Impact Capital (SS)</div>
+                                <h3 id="sim-kpi-cap">--</h3>
+                                <div id="sim-kpi-cap-delta" class="kpi-delta"></div>
+                            </div>
+                            <div class="kpi-card glass">
+                                <div class="kpi-label">Risque Rupture (Coût)</div>
+                                <h3 id="sim-kpi-rupt">--</h3>
+                                <div id="sim-kpi-rupt-delta" class="kpi-delta"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container glass">
+                            <h3>Comparaison des Coûts : Actuel vs Simulé</h3>
+                            <div id="sim-chart"></div>
+                        </div>
+
+                        <div class="table-container glass" style="margin-top: 20px;">
+                            <h3>Détails par Article (Top 10)</h3>
+                            <table id="sim-table">
+                                <thead>
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>SS (Sim)</th>
+                                        <th>C. Poss (Sim)</th>
+                                        <th>C. Rupt (Sim)</th>
+                                        <th>Delta TCO</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="loader" class="loader-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
