@@ -17,7 +17,7 @@ import os
 import unittest
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
+from statistics import NormalDist
 
 # Ajout du répertoire parent au path pour importer core/
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -61,7 +61,7 @@ class TestInventoryEngine(unittest.TestCase):
 
     def test_z_score(self):
         """Z-score correspond au taux de service 95%."""
-        z_expected = norm.ppf(0.95)
+        z_expected = NormalDist().inv_cdf(0.95)
         z_actual = self.df_computed["z_score"].iloc[0]
         self.assertAlmostEqual(z_actual, z_expected, places=6)
 
@@ -76,7 +76,7 @@ class TestInventoryEngine(unittest.TestCase):
         pour ART-001.
         """
         row = self.df_computed[self.df_computed["article_id"] == "ART-001"].iloc[0]
-        z = norm.ppf(0.95)
+        z = NormalDist().inv_cdf(0.95)
         L = 7
         sigma_d = 2
         D = 10
