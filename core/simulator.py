@@ -10,7 +10,7 @@ Sur les paramètres SS, ROP, EOQ et le coût total.
 
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
+from statistics import NormalDist
 
 
 def simulate(
@@ -26,10 +26,11 @@ def simulate(
     df = df.copy()
 
     # --- Préparation des variables ---
-    z_actuel_val = df["z_score"].iloc[0] if "z_score" in df and len(df) > 0 else norm.ppf(0.95)
-    taux_service_actuel = norm.cdf(z_actuel_val)
+    normal = NormalDist()
+    z_actuel_val = df["z_score"].iloc[0] if "z_score" in df and len(df) > 0 else normal.inv_cdf(0.95)
+    taux_service_actuel = normal.cdf(z_actuel_val)
     taux_service_simule = np.clip(taux_service_actuel + delta_service, 0.50, 0.9999)
-    z_simule = norm.ppf(taux_service_simule)
+    z_simule = normal.inv_cdf(taux_service_simule)
 
     L_actuel = df["delai_fournisseur_jours"]
     L_simule = np.maximum(L_actuel + delta_delai, 1.0)
@@ -73,7 +74,7 @@ def simulate(
         # 3. Coût de rupture (Shortage)
         # Espérance de rupture par cycle : E(z) = σ_DL × G(z)
         # G(z) = f(z) - z(1 - F(z))
-        gz = norm.pdf(z_v) - z_v * (1 - norm.cdf(z_v))
+        gz = normal.pdf(z_v) - z_v * (1 - normal.cdf(z_v))
         rupture_par_cycle = sigma_dl_v * gz
         nb_cycles_an = d_ann / eoq_safe
         rupture_annuelle = rupture_par_cycle * nb_cycles_an
